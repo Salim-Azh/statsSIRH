@@ -1,3 +1,4 @@
+
 ####   ****Installation de packages
 install.packages("VennDiagram")
 library("VennDiagram")
@@ -14,17 +15,17 @@ donnee=donneeIni[,3:11]
 colnames(donnee)=c("sexe","influence.For","priorite.For","prerequis.For","def.Inf.avantFor",
                	"def.Inf.apresFor","satisfaction.For","PlaquetteFemme","IG.Femme")
 donnee$sexe = recode_factor(donnee$sexe,
-                             	"un homme" = "Homme",
-                             	"une femme" = "Femme"
-          	)
-         	 
-  donnee$satisfaction = recode_factor(donnee$satisfaction.For,
-                                     	"1" = "Tres satisfait",
-                                     	"2" = "Satisfait",
-                                     	"3" = "Peu satisfait",
-                                     	"4" = "Pas satisfait"
-                                    	 
-          	)
+                        	"un homme" = "Homme",
+                        	"une femme" = "Femme"
+)
+
+donnee$satisfaction = recode_factor(donnee$satisfaction.For,
+                                	"1" = "Tres satisfait",
+                                	"2" = "Satisfait",
+                                	"3" = "Peu satisfait",
+                                	"4" = "Pas satisfait"
+                               	 
+)
 
 ##Gestion definition informaticien
 def.inf=donnee[,c("def.Inf.avantFor","def.Inf.apresFor")]
@@ -44,15 +45,15 @@ def.inf=mutate(def.inf,
 #Gestion de Autre pour modif.defInf
 def.inf=mutate(def.inf,
            	temp_avant = tolower(str_replace_all(def.Inf.avantFor, c("Comme un gamer"= "","Comme un geek"= "","Comme un no-life"= "",
-                                                           	"Comme une personne résolvant des problèmes"= "",
-                                                           	"Comme un scientifique"= "","Comme un analyste"= "",";"=""," "=""))),
+                                                                    	"Comme une personne résolvant des problèmes"= "",
+                                                                    	"Comme un scientifique"= "","Comme un analyste"= "",";"=""," "=""))),
            	temp_apres = tolower(str_replace_all(def.Inf.apresFor, c("Comme un gamer"= "","Comme un geek"= "","Comme un no-life"= "",
-                                                           	"Comme une personne résolvant des problèmes"= "",
-                                                           	"Comme un scientifique"= "","Comme un analyste"= "",";"=""," "=""))),
-
+                                                                    	"Comme une personne résolvant des problèmes"= "",
+                                                                    	"Comme un scientifique"= "","Comme un analyste"= "",";"=""," "=""))),
+          	 
            	temp_modif = ifelse(modif.defInf == "Oui" & temp_avant != "" & temp_apres !="" & temp_avant == temp_apres, "Non", "Oui"),
            	modif.defInf = ifelse(modif.defInf == "Non" | temp_modif =="Non", "Non", "Oui")
-                    	 
+          	 
 )
 def.inf = def.inf[-(which(colnames(def.inf) == "temp_avant"))]
 def.inf = def.inf[-(which(colnames(def.inf) == "temp_apres"))]
@@ -118,8 +119,8 @@ grapheUnivar=function(vecteur,titreGraphe,nomVariable){
 ## mosaic plot
 couleurs = c("beige","brown","cyan","grey","mint","charcoal","blue","green","yellow")
 graphe_mosaic = function(v1, v2, main_, xlab_, ylab_){
-   nbModalite = length(levels(v2))
-   mosaicplot(v1~v2,
+  nbModalite = length(levels(v2))
+  mosaicplot(v1~v2,
          	main = main_,
          	xlab = xlab_,
          	ylab = ylab_,
@@ -127,3 +128,65 @@ graphe_mosaic = function(v1, v2, main_, xlab_, ylab_){
          	border = "chocolate",
          	color = couleurs[1:nbModalite])
 }
+
+#Diagramme de venn
+
+nbPlaquette=length(which(influence$plaquette=="Oui"))
+nbSite=length(which(influence$site_web=="Oui"))
+nbAmi=length(which(influence$ami=="Oui"))
+nbAutre=length(which(influence$autre=="Oui"))
+nbPlaquette_Site=length(which(influence$plaquette=="Oui" & influence$site_web=="Oui"))# inter(plaquette et site)
+nbPlaquette_Ami=length(which(influence$plaquette=="Oui"& influence$Ami=="Oui"))
+nbPlaquette_Autre=length(which(influence$plaquette=="Oui" & influence$autre=="Oui"))
+nbSite_Ami=length(which(influence$site_web=="Oui" & influence$ami=="Oui"))
+nbSite_Autre=length(which(influence$site_web=="Oui" & influence$autre=="Oui"))
+nbAmi_Autre=length(which(influence$autre=="Oui" & influence$ami=="Oui"))
+nbPlaquetteSiteAmi=length(which(influence$plaquette=="Oui" & influence$site_web=="Oui" & influence$Ami=="Oui"))
+nbPlaquetteSiteAutre=length(which(influence$plaquette=="Oui" & influence$site_web=="Oui" & influence$autre=="Oui"))
+nbPlaquetteAmiAutre=length(which(influence$plaquette=="Oui" & influence$ami=="Oui" & influence$autre=="Oui"))
+nbSiteAmiAutre=length(which(influence$ami=="Oui" & influence$site_web=="Oui" & influence$autre=="Oui"))
+nbPlaquetteSiteAmiAutre=length(which(influence$plaquette=="Oui" & influence$site_web=="Oui" & influence$ami=="Oui" & influence$autre=="Oui"))
+draw.quad.venn(area1=nbPlaquette,
+           	area2=nbSite,
+           	area3=nbAmi,
+           	area4=nbAutre,
+           	n12=nbPlaquette_Site,
+           	n13=nbPlaquette_Ami,
+           	n14=nbPlaquette_Autre,
+           	n23=nbSite_Ami,
+           	n24=nbSite_Autre,
+           	n34=nbAmi_Autre,
+           	n123=nbPlaquetteSiteAmi,
+           	n124=nbPlaquetteSiteAutre,
+           	n134=nbPlaquetteAmiAutre,
+           	n234=nbSiteAmiAutre,
+           	n1234=nbPlaquetteSiteAmiAutre,
+           	category = c("Plaquette Papier", "Site", "Ami","Autre"), # titre des cercles
+           	fill = c("orange", "red", "green","blue"), # couleurs des cercles
+           	cex = 2,cat.cex = 2, # taille de la police
+           	lty = "blank" # traits
+)
+
+##Graphique(1) la répartition des étudiants selon le sexe :
+grapheUnivar(donnee$sexe,"","sexe")
+
+##Graphique(2)  proportion de  premier choix de poursuite d’étude :
+grapheUnivar(donnee$priorite.For,"","IG comme premier choix")
+
+##Graphique(3) les premiers choix de poursuite d’étude selon le genre
+graphe_mosaic(donnee$sexe, donnee$priorite.For, "", "sexe", "IG comme premier choix")
+                    	 
+##Graphique(4) sur les étudiants et l’évaluation de leurs capacités par rapport à celle requise par la formation
+graphe_mosaic(donnee$sexe, donnee$prerequis.For, "", "sexe", "Ressources nécessaires")
+
+##Graphique(5) la satisfaction selon le genre :
+graphe_mosaic(donnee$sexe, donnee$satisfaction, "", "sexe", "satisfaction" )
+
+##Graphique(7) La représentation des femmes sur la plaquette IG
+graphe_mosaic(donnee$sexe, donnee$PlaquetteFemme, "", "sexe", "Représentation des femmes sur la plaquette")
+
+##Graphique (8) est-ce que les femmes sont suffisamment présente sur les plaquettes par rapport à la réalité
+graphe_mosaic(donnee$PlaquetteFemme, donnee$IG.Femme, "", "Sur la plaquette", "Dans la realité")
+
+##Graphique(9) évolution définition d’un informaticien avant et en IG
+grapheUnivar(reponseDefInformatique,"","Definition informaticien")
